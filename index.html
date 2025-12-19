@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>İyi ki Doğdun Alanur Başkan!</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;600;800&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            text-align: center;
+            color: white;
+            padding-bottom: 50px; /* Scroll payı */
+        }
+
+        /* Yıldızlar */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: twinkle 4s infinite;
+            opacity: 0.5;
+            z-index: 0;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        h1 {
+            font-family: 'Pacifico', cursive;
+            color: #ffdd59;
+            font-size: 2.5rem;
+            margin-top: 20px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px #ffdd59, 0 0 20px #ff9ff3;
+            z-index: 10;
+        }
+
+        .subtitle {
+            color: #00d2d3;
+            font-size: 1rem;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #00d2d3;
+            z-index: 10;
+        }
+
+        /* Pasta Konteyner */
+        .cake-container {
+            position: relative;
+            margin-bottom: 50px;
+            filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.4));
+            z-index: 10;
+        }
+
+        .cake {
+            width: 220px;
+            height: 90px;
+            background: #4b3832;
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            box-shadow: 0 4px 0 #3a2a25, 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .cake::before {
+            content: '';
+            position: absolute;
+            background: #d63384;
+            width: 100%;
+            height: 25px;
+            border-radius: 10px 10px 5px 5px;
+            top: 0;
+            left: 0;
+            background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, #ff6b6b 10px, #ff6b6b 20px);
+        }
+
+        .cherry {
+            width: 20px;
+            height: 20px;
+            background: #ff0000;
+            border-radius: 50%;
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 15px #ff0000;
+            z-index: 2;
+        }
+
+        /* Mumlar */
+        .candles {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: absolute;
+            top: -30px;
+            width: 100%;
+        }
+
+        .candle {
+            width: 10px;
+            height: 40px;
+            background: repeating-linear-gradient(45deg, #00d2d3, #00d2d3 5px, #222 5px, #222 10px);
+            position: relative;
+            border-radius: 3px;
+        }
+
+        .flame {
+            width: 14px;
+            height: 22px;
+            background: #ff9f43;
+            border-radius: 50% 50% 20% 20%;
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px #ff9f43, 0 0 40px #ffdd59;
+            animation: flicker 0.3s infinite alternate;
+            transform-origin: bottom center;
+            transition: all 0.3s ease; /* Hızlı geçiş */
+        }
+
+        /* Mum sönme stili - !important ile kesinleştirildi */
+        .flame.out {
+            animation: none !important;
+            opacity: 0 !important;
+            transform: translateX(-50%) scale(0) !important;
+            box-shadow: none !important;
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); opacity: 1; }
+            100% { transform: translateX(-50%) scale(1.1); opacity: 0.9; }
+        }
+
+        /* Buton */
+        button {
+            background: linear-gradient(90deg, #d63384, #48dbfb);
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(214, 51, 132, 0.6);
+            transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            z-index: 10;
+        }
+
+        /* Gizli Alanlar */
+        #content-area {
+            opacity: 0;
+            margin-top: 30px;
+            transform: translateY(30px);
+            transition: all 1s ease;
+            z-index: 10;
+            width: 90%;
+            max-width: 400px;
+            display: none; /* Yer kaplamasın diye başta yok */
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        #content-area.show {
+            opacity: 1;
+            transform: translateY(0);
+            display: flex;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .celebrity-list {
+            text-align: left;
+            margin-top: 10px;
+        }
+        
+        .celebrity-list li {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #ddd;
+            list-style: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 3px;
+        }
+        .celebrity-list b { color: #ff9ff3; }
+
+    </style>
+</head>
+<body>
+
+    <div class="stars"></div>
+
+    <h1>İyi ki Doğdun<br>Alanur Başkan! 🌙</h1>
+    <p class="subtitle">Bu gece senin gecen!</p>
+
+    <div class="cake-container">
+        <div class="candles">
+            <div class="candle"><div class="flame" id="f1"></div></div>
+            <div class="candle"><div class="flame" id="f2"></div></div>
+            <div class="candle"><div class="flame" id="f3"></div></div>
+        </div>
+        <div class="cake">
+            <div class="cherry"></div>
+        </div>
+    </div>
+
+    <button id="blowBtn" onclick="blowCandles()">Mumu Üfle 🌬️</button>
+
+    <div id="content-area">
+        <div class="card">
+            <h3 style="color: #ffdd59; margin:0 0 10px 0;">Mutlu Yıllar Kaptan! 🎂</h3>
+            <p style="font-size: 1rem; color: #eee;">
+                Yeni yaşın bu gece gibi parlak, yıldızlar kadar bol şanslı olsun. <br><br>
+                <b>Seni çok seviyoruz!</b>
+            </p>
+        </div>
+
+        <div class="card">
+            <h4 style="color: #00d2d3; margin: 0 0 10px 0;">Seninle Aynı Gün Doğan Efsaneler (20 Aralık) 😎</h4>
+            <ul class="celebrity-list" style="padding:0;">
+                <li>⚽ <b>Kylian Mbappé</b> (Dünya Yıldızı)</li>
+                <li>📚 <b>Mehmet Akif Ersoy</b> (İstiklal Şairimiz)</li>
+                <li>✍️ <b>Aziz Nesin</b> (Yazar)</li>
+                <li>🎬 <b>Jonah Hill</b> (Hollywood Yıldızı)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const neonColors = ['#ffdd59', '#ff9ff3', '#00d2d3', '#54a0ff', '#ff4757'];
+
+        function blowCandles() {
+            // 1. Mumları Kesin Olarak Söndür
+            document.getElementById('f1').classList.add('out');
+            document.getElementById('f2').classList.add('out');
+            document.getElementById('f3').classList.add('out');
+
+            // 2. Butonu Gizle
+            const btn = document.getElementById('blowBtn');
+            btn.style.transition = "opacity 0.5s";
+            btn.style.opacity = '0';
+            setTimeout(() => btn.style.display = 'none', 500);
+
+            // 3. Konfeti Yağmuru
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: neonColors,
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: neonColors,
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+
+            // 4. İçerik Kartlarını Göster (Hafif gecikmeli)
+            setTimeout(() => {
+                const content = document.getElementById('content-area');
+                content.classList.add('show');
+                
+                // Final Patlaması
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: neonColors,
+                    zIndex: 999
+                });
+            }, 600);
+        }
+    </script>
+
+</body>
+</html>
