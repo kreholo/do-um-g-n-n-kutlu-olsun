@@ -3,318 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>İyi ki Doğdun Alanur Başkan!</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <title>Telefondan Kaçınma Oyunu</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;600;800&display=swap');
-
+        /* Temel Sayfa Düzeni */
         body {
             margin: 0;
             padding: 0;
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
-            min-height: 100vh;
+            background-color: #222;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-family: 'Poppins', sans-serif;
-            overflow-x: hidden;
+            height: 100vh;
+            color: white;
+            font-family: sans-serif;
+            overflow: hidden; /* Kaydırmayı engelle */
+            touch-action: none; /* Yakınlaştırma vb. engelle */
+        }
+
+        /* Oyun Alanı (Canvas) Stili */
+        #gameCanvas {
+            border: 2px solid #555;
+            background-color: #000;
+            /* Mobilde dikey ekran için en boy oranı koruma */
+            max-width: 95vw;
+            max-height: 70vh; 
+            width: auto;
+            height: auto;
+        }
+
+        /* UI Alanı */
+        #ui-container {
             text-align: center;
-            color: white;
-            padding-bottom: 50px; /* Scroll payı */
+            margin-bottom: 10px;
         }
 
-        /* Yıldızlar */
-        .stars {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
-                radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0));
-            background-repeat: repeat;
-            background-size: 200px 200px;
-            animation: twinkle 4s infinite;
-            opacity: 0.5;
-            z-index: 0;
+        #scoreBoard {
+            font-size: 24px;
+            font-weight: bold;
         }
 
-        @keyframes twinkle {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-
-        h1 {
-            font-family: 'Pacifico', cursive;
-            color: #ffdd59;
-            font-size: 2.5rem;
-            margin-top: 20px;
-            margin-bottom: 5px;
-            text-shadow: 0 0 10px #ffdd59, 0 0 20px #ff9ff3;
-            z-index: 10;
-        }
-
-        .subtitle {
-            color: #00d2d3;
-            font-size: 1rem;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-            text-shadow: 0 0 10px #00d2d3;
-            z-index: 10;
-        }
-
-        /* Pasta Konteyner */
-        .cake-container {
-            position: relative;
-            margin-bottom: 50px;
-            filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.4));
-            z-index: 10;
-        }
-
-        .cake {
-            width: 220px;
-            height: 90px;
-            background: #4b3832;
-            border-radius: 10px 10px 0 0;
-            position: relative;
-            box-shadow: 0 4px 0 #3a2a25, 0 20px 40px rgba(0,0,0,0.5);
-        }
-
-        .cake::before {
-            content: '';
-            position: absolute;
-            background: #d63384;
-            width: 100%;
-            height: 25px;
-            border-radius: 10px 10px 5px 5px;
-            top: 0;
-            left: 0;
-            background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, #ff6b6b 10px, #ff6b6b 20px);
-        }
-
-        .cherry {
-            width: 20px;
-            height: 20px;
-            background: #ff0000;
-            border-radius: 50%;
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 0 15px #ff0000;
-            z-index: 2;
-        }
-
-        /* Mumlar */
-        .candles {
+        /* Kontrol Butonları Alanı */
+        #controls-container {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            position: absolute;
-            top: -30px;
-            width: 100%;
-        }
-
-        .candle {
-            width: 10px;
-            height: 40px;
-            background: repeating-linear-gradient(45deg, #00d2d3, #00d2d3 5px, #222 5px, #222 10px);
-            position: relative;
-            border-radius: 3px;
-        }
-
-        .flame {
-            width: 14px;
-            height: 22px;
-            background: #ff9f43;
-            border-radius: 50% 50% 20% 20%;
-            position: absolute;
-            top: -22px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 0 20px #ff9f43, 0 0 40px #ffdd59;
-            animation: flicker 0.3s infinite alternate;
-            transform-origin: bottom center;
-            transition: all 0.3s ease; /* Hızlı geçiş */
-        }
-
-        /* Mum sönme stili - !important ile kesinleştirildi */
-        .flame.out {
-            animation: none !important;
-            opacity: 0 !important;
-            transform: translateX(-50%) scale(0) !important;
-            box-shadow: none !important;
-        }
-
-        @keyframes flicker {
-            0% { transform: translateX(-50%) scale(1); opacity: 1; }
-            100% { transform: translateX(-50%) scale(1.1); opacity: 0.9; }
-        }
-
-        /* Buton */
-        button {
-            background: linear-gradient(90deg, #d63384, #48dbfb);
-            border: none;
-            padding: 15px 35px;
-            font-size: 1.2rem;
-            color: white;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(214, 51, 132, 0.6);
-            transition: all 0.3s;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 800;
-            z-index: 10;
-        }
-
-        /* Gizli Alanlar */
-        #content-area {
-            opacity: 0;
-            margin-top: 30px;
-            transform: translateY(30px);
-            transition: all 1s ease;
-            z-index: 10;
-            width: 90%;
+            width: 95%;
             max-width: 400px;
-            display: none; /* Yer kaplamasın diye başta yok */
-            flex-direction: column;
-            gap: 20px;
+            justify-content: space-between;
+            margin-top: 15px;
+            height: 80px; /* Buton yüksekliği */
         }
-        
-        #content-area.show {
-            opacity: 1;
-            transform: translateY(0);
+
+        /* Butonların Kendisi */
+        .control-btn {
+            flex: 1; /* Alanı eşit paylaş */
+            margin: 0 5px;
+            background-color: #4CAF50; /* Yeşil butonlar */
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            /* Dokunmatik hissi için */
             display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none; /* Metin seçimini engelle */
         }
 
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .control-btn:active {
+            background-color: #45a049; /* Basılınca renk değişimi */
+            transform: scale(0.98);
         }
 
-        .celebrity-list {
-            text-align: left;
-            margin-top: 10px;
+        /* Oyun Bitti Ekranı */
+        #gameOverScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px;
+            display: none; /* Başlangıçta gizli */
+            z-index: 10;
         }
-        
-        .celebrity-list li {
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            color: #ddd;
-            list-style: none;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 3px;
+        #gameOverScreen button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
         }
-        .celebrity-list b { color: #ff9ff3; }
 
     </style>
 </head>
 <body>
 
-    <div class="stars"></div>
-
-    <h1>İyi ki Doğdun<br>Alanur Başkan! 🌙</h1>
-    <p class="subtitle">Bu gece senin gecen!</p>
-
-    <div class="cake-container">
-        <div class="candles">
-            <div class="candle"><div class="flame" id="f1"></div></div>
-            <div class="candle"><div class="flame" id="f2"></div></div>
-            <div class="candle"><div class="flame" id="f3"></div></div>
-        </div>
-        <div class="cake">
-            <div class="cherry"></div>
-        </div>
+    <div id="ui-container">
+        <div id="scoreBoard">Skor: 0</div>
     </div>
 
-    <button id="blowBtn" onclick="blowCandles()">Mumu Üfle 🌬️</button>
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
 
-    <div id="content-area">
-        <div class="card">
-            <h3 style="color: #ffdd59; margin:0 0 10px 0;">Mutlu Yıllar Kaptan! 🎂</h3>
-            <p style="font-size: 1rem; color: #eee;">
-                Yeni yaşın bu gece gibi parlak, yıldızlar kadar bol şanslı olsun. <br><br>
-                <b>Seni çok seviyoruz!</b>
-            </p>
-        </div>
+    <div id="gameOverScreen">
+        <h1>Oyun Bitti!</h1>
+        <p>Son Skorunuz: <span id="finalScore">0</span></p>
+        <button onclick="startGame()">Tekrar Oyna</button>
+    </div>
 
-        <div class="card">
-            <h4 style="color: #00d2d3; margin: 0 0 10px 0;">Seninle Aynı Gün Doğan Efsaneler (20 Aralık) 😎</h4>
-            <ul class="celebrity-list" style="padding:0;">
-                <li>⚽ <b>Kylian Mbappé</b> (Dünya Yıldızı)</li>
-                <li>📚 <b>Mehmet Akif Ersoy</b> (İstiklal Şairimiz)</li>
-                <li>✍️ <b>Aziz Nesin</b> (Yazar)</li>
-                <li>🎬 <b>Jonah Hill</b> (Hollywood Yıldızı)</li>
-            </ul>
-        </div>
+    <div id="controls-container">
+        <button class="control-btn" id="btnLeft">◄ SOL</button>
+        <button class="control-btn" id="btnRight">SAĞ ►</button>
     </div>
 
     <script>
-        const neonColors = ['#ffdd59', '#ff9ff3', '#00d2d3', '#54a0ff', '#ff4757'];
+        // === OYUN DEĞİŞKENLERİ ===
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('scoreBoard');
+        const finalScoreElement = document.getElementById('finalScore');
+        const gameOverScreen = document.getElementById('gameOverScreen');
 
-        function blowCandles() {
-            // 1. Mumları Kesin Olarak Söndür
-            document.getElementById('f1').classList.add('out');
-            document.getElementById('f2').classList.add('out');
-            document.getElementById('f3').classList.add('out');
+        let score = 0;
+        let isGameOver = false;
+        let animationId;
+        let gameSpeedMultiplier = 1;
 
-            // 2. Butonu Gizle
-            const btn = document.getElementById('blowBtn');
-            btn.style.transition = "opacity 0.5s";
-            btn.style.opacity = '0';
-            setTimeout(() => btn.style.display = 'none', 500);
+        // Oyuncu (Mavi Kare)
+        const player = {
+            x: canvas.width / 2 - 15,
+            y: canvas.height - 30,
+            width: 30,
+            height: 30,
+            color: '#0095DD',
+            speed: 5,
+            dx: 0 // Yatay hareket hızı
+        };
 
-            // 3. Konfeti Yağmuru
-            var duration = 3 * 1000;
-            var end = Date.now() + duration;
+        // Engeller (Kırmızı Kareler)
+        let obstacles = [];
+        const obstacleSpawnRate = 60; // Ne sıklıkla engel çıkacak (düşük = daha sık)
+        let frameCount = 0;
 
-            (function frame() {
-                confetti({
-                    particleCount: 5,
-                    angle: 60,
-                    spread: 55,
-                    origin: { x: 0 },
-                    colors: neonColors,
-                });
-                confetti({
-                    particleCount: 5,
-                    angle: 120,
-                    spread: 55,
-                    origin: { x: 1 },
-                    colors: neonColors,
-                });
+        // Kontrol Durumları
+        let leftPressed = false;
+        let rightPressed = false;
 
-                if (Date.now() < end) {
-                    requestAnimationFrame(frame);
-                }
-            }());
+        // === KONTROL BUTONU OLAYLARI (Mobilde kritik kısım) ===
+        const btnLeft = document.getElementById('btnLeft');
+        const btnRight = document.getElementById('btnRight');
 
-            // 4. İçerik Kartlarını Göster (Hafif gecikmeli)
-            setTimeout(() => {
-                const content = document.getElementById('content-area');
-                content.classList.add('show');
-                
-                // Final Patlaması
-                confetti({
-                    particleCount: 150,
-                    spread: 70,
-                    origin: { y: 0.6 },
-                    colors: neonColors,
-                    zIndex: 999
-                });
-            }, 600);
+        // SOL Buton Dinleyicileri
+        // Parmağı dokundurunca veya fareyle basınca:
+        btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); leftPressed = true; });
+        btnLeft.addEventListener('mousedown', () => { leftPressed = true; });
+        // Parmağı çekince veya fareyi bırakınca:
+        btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); leftPressed = false; });
+        btnLeft.addEventListener('mouseup', () => { leftPressed = false; });
+        btnLeft.addEventListener('mouseleave', () => { leftPressed = false; }); // Butondan çıkarsa dur
+
+        // SAĞ Buton Dinleyicileri
+        btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); rightPressed = true; });
+        btnRight.addEventListener('mousedown', () => { rightPressed = true; });
+        btnRight.addEventListener('touchend', (e) => { e.preventDefault(); rightPressed = false; });
+        btnRight.addEventListener('mouseup', () => { rightPressed = false; });
+        btnRight.addEventListener('mouseleave', () => { rightPressed = false; });
+
+
+        // === OYUN MANTIĞI ===
+
+        function spawnObstacle() {
+            const size = Math.random() * 30 + 20; // 20 ile 50 arası rastgele boyut
+            obstacles.push({
+                x: Math.random() * (canvas.width - size), // Rastgele yatay konum
+                y: -size, // Ekranın hemen üzerinden başla
+                width: size,
+                height: size,
+                color: '#FF4136',
+                speed: (Math.random() * 2 + 2) * gameSpeedMultiplier // Hız zamanla artar
+            });
         }
-    </script>
 
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function drawObstacles() {
+            obstacles.forEach(obs => {
+                ctx.fillStyle = obs.color;
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+            });
+        }
+
+        function movePlayer() {
+            // Butonlara basılı tutuluyorsa hareket et
+            if (leftPressed && player.x > 0) {
+                player.x -= player.speed;
+            }
+            if (rightPressed && player.x + player.width < canvas.width) {
+                player.x += player.speed;
+            }
+        }
+
+        function updateObstacles() {
+            for (let i = 0; i < obstacles.length; i++) {
+                let obs = obstacles[i];
+                obs.y += obs.speed;
+
+                // Çarpışma Kontrolü (AABB Yöntemi - Kutu kutuya değdi mi?)
+                if (
+                    player.x < obs.x + obs.width &&
+                    player.x + player.width > obs.x &&
+                    player.y < obs.y + obs.height &&
+                    player.y + player.height > obs.y
+                ) {
+                    endGame();
+                    return; // Döngüden çık
+                }
+
+                // Ekrandan çıkan engelleri sil ve skor ekle
+                if (obs.y > canvas.height) {
+                    obstacles.splice(i, 1); // Diziden çıkar
+                    score++;
+                    scoreElement.innerText = "Skor: " + score;
+                    i--; // İndeksi düzelt çünkü bir eleman sildik
+
+                    // Her 10 skorda bir oyunu biraz hızlandır
+                    if (score % 10 === 0) {
+                        gameSpeedMultiplier += 0.1;
+                    }
+                }
+            }
+        }
+
+        function endGame() {
+            isGameOver = true;
+            cancelAnimationFrame(animationId); // Oyun döngüsünü durdur
+            finalScoreElement.innerText = score;
+            gameOverScreen.style.display = 'block'; // Oyun bitti ekranını göster
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // === ANA OYUN DÖNGÜSÜ ===
+        function gameLoop() {
+            if (isGameOver) return;
+
+            clearCanvas();
+
+            movePlayer();
+            drawPlayer();
+
+            frameCount++;
+            // Belirli aralıklarla yeni engel oluştur
+            if (frameCount % obstacleSpawnRate === 0) {
+                spawnObstacle();
+            }
+            
+            updateObstacles();
+            drawObstacles();
+
+            // Bir sonraki kare için döngüyü tekrar çağır
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // Oyunu Başlatma/Sıfırlama Fonksiyonu
+        function startGame() {
+            // Değişkenleri sıfırla
+            score = 0;
+            scoreElement.innerText = "Skor: " + score;
+            obstacles = [];
+            isGameOver = false;
+            gameSpeedMultiplier = 1;
+            player.x = canvas.width / 2 - 15;
+            gameOverScreen.style.display = 'none';
+            frameCount = 0;
+
+            // Döngüyü başlat
+            gameLoop();
+        }
+
+        // Sayfa yüklenince oyunu başlat
+        startGame();
+
+    </script>
 </body>
 </html>
